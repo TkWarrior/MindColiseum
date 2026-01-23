@@ -1,4 +1,5 @@
 from states.states import DebateState
+from llms.pro_agent_llm import pro_agent_llm
 
 def pro_agent(state:DebateState):
     pro_arguement = pro_agent_llm.generate_argument(

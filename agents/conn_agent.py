@@ -1,4 +1,5 @@
 from states.states import DebateState
+from llms.conn_agent_llm import conn_agent_llm
 
 def conn_agent(state:DebateState):
     con_argument = conn_agent_llm.generate_argument(
