@@ -1,7 +1,9 @@
+from states.states import DebateState
+from llms.judge_agent_llm import judge_agent_llm
 
 def judge_agent(state:DebateState):
     
-    comments, updated_score = jusdge_agent_llm.evaluate_arguements(
+    comments, updated_score = judge_agent_llm.evaluate_arguements(
         pro_arguements=state["pro_arguments"],
         conn_arguments=state["conn_arguments"],
     )
