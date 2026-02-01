@@ -1,4 +1,5 @@
-from typing import TypedDict , List , Dict
+from typing import TypedDict ,Annotated, List , Dict
+from langgraph.graph import add_messages
 
 class DebateState(TypedDict):
     
@@ -11,6 +12,6 @@ class DebateState(TypedDict):
     
     judge_comments : List[str]
     scores : Dict[str, int] # {"pro": score , "con": score} objectively assign scores
-    transcript : List[Dict[str , str]] 
+    transcript : Annotated[List[Dict[str , str]] , add_messages] 
     
     debate_over : bool   

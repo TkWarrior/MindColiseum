@@ -1,3 +1,4 @@
+import json
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -10,7 +11,7 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"  # Groq endpoint
 )
 
-def evaluate_arguements(pro_arguements, conn_arguements):
+def evaluate_arguments(pro_arguments, conn_arguments):
     
     messages = [
         {"role": "system", "content": judge_agent_prompt()},
@@ -19,10 +20,10 @@ def evaluate_arguements(pro_arguements, conn_arguements):
             "content": f"""
                
                 Supporter Arguments:
-                {pro_arguements }
+                {pro_arguments }
 
                 Opponent Arguments:
-                {conn_arguements }
+                {conn_arguments }
 
                 Generate your feedback now.
                 """
@@ -30,35 +31,38 @@ def evaluate_arguements(pro_arguements, conn_arguements):
     ]
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         messages=messages,
         temperature=0.8,       # persuasive but controlled
         max_tokens=300
     )
+    raw = response.choices[0].message.content.strip()
+    parsed = json.loads(raw)
+    result = parsed["comments"], parsed["updated_score"]
+    # print("raw print:" ,raw)
+    # print("result print:",result)
+    return result
 
-    print(response.choices[0].message.content.strip())
-    return response.choices[0].message.content.strip()
+# if __name__ == "__main__":
+#     topic = "AI should replace traditional classroom teaching"
 
-if __name__ == "__main__":
-    topic = "AI should replace traditional classroom teaching"
+#     pro_arguements = [
+#         "Human teachers provide emotional intelligence.",
+#         "AI lacks real-world classroom experience."
+#     ]
 
-    pro_arguements = [
-        "Human teachers provide emotional intelligence.",
-        "AI lacks real-world classroom experience."
-    ]
-
-    conn_arguements = [
-    "AI can provide personalized learning at scale.",
-    "AI systems can be trained using vast real-world classroom data."
-    ]
+#     conn_arguements = [
+#     "AI can provide personalized learning at scale.",
+#     "AI systems can be trained using vast real-world classroom data."
+#     ]
 
 
-    output = evaluate_arguements(
-        pro_arguements=pro_arguements,
-        conn_arguements=conn_arguements
-    )
+#     output = evaluate_arguements(
+#         pro_arguements=pro_arguements,
+#         conn_arguements=conn_arguements
+#     )
 
-    print("\n🟢 JUDGE COMMENT:\n")
+#     print("JUDGE COMMENT:\n")
     
-    print(output)
+#     print(output)
     

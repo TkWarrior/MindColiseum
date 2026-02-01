@@ -12,16 +12,16 @@ graph.add_node("pro_agent", pro_agent)
 graph.add_node("conn_agent", conn_agent)    
 graph.add_node("judge_agent", judge_agent)
 graph.add_node("summary_agent", summary_agent)
+graph.set_finish_point("summary_agent")  ## Ending point of the graph
 
 graph.add_edge("pro_agent", "conn_agent")
 graph.add_edge("conn_agent", "judge_agent")
 graph.add_edge("judge_agent", "summary_agent")
-graph.add_edge("summary_agent", graph.END)
+
 graph.add_conditional_edges(
     "judge_agent",
-    should_continue=lambda state: "summary_agent" if state["debate_over"] else "pro_agent",
-    transitions = {"pro_agent": "pro_agent", "summary_agent": "summary_agent"}
+    lambda state: "summary_agent" if state["debate_over"] else "pro_agent",
+    {"pro_agent": "pro_agent", "summary_agent": "summary_agent"}
 )
 
 agent = graph.compile()
-print(agent)

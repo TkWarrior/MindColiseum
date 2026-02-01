@@ -31,7 +31,10 @@ def judge_agent_prompt():
            c. Keep feedback actionable and specific.
 
         5. Assign Scores:
-                  a. Assign 0–2 points to each agent for this round.
+           a. Pick a winner in each round.
+               Winner gets 1 point.
+               Loser gets 0 points.
+               No ties.
            b. Higher scores should reflect stronger reasoning, clarity, and relevance.
            c. Scores must be justified by your evaluation.
 
@@ -42,11 +45,11 @@ def judge_agent_prompt():
         Return your response ONLY in valid JSON format:
 
         {
-          "feedback": [
+          "comments": [
             "feedback comment 1",
             "feedback comment 2"
           ],
-          "score_update": {
+          "updated_score": {
             "pro": 0,
             "con": 0
           }

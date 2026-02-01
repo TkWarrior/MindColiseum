@@ -1,5 +1,5 @@
 from states.states import DebateState
-from llms.conn_agent_llm import conn_agent_llm
+from llms import conn_agent_llm
 
 def conn_agent(state:DebateState):
     conn_argument = conn_agent_llm.generate_argument(
@@ -8,8 +8,18 @@ def conn_agent(state:DebateState):
         judge_comments=state["judge_comments"]
     )
     
-    state["con_arguments"].append(conn_argument)
-    state["transcript"].append({"speaker": "conn_agent", "argument": con_argument})
+    state["conn_arguments"].append(conn_argument)
+    print("conn arguments : ",state["conn_arguments"])
+    # state["transcript"].append({"speaker": "conn_agent", "argument": conn_argument})
     state["current_agent"] = "pro_agent"
     
-    return state
+    return {
+        "conn_arguments":state["conn_arguments"],
+        "transcript": [
+            {
+                "role": "assistant",
+                "content": f"[CON] {conn_argument}"
+            }
+        ],
+        "current_agent":state["current_agent"]
+    }

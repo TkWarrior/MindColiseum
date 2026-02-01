@@ -10,9 +10,7 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1"  # Groq endpoint
 )
 
-
-
-def generate_argument(topic, conn_arguements=None, judge_comments=None):
+def generate_argument(topic, conn_arguments, judge_comments):
     messages = [
         {"role": "system", "content": pro_agent_prompt()},
         {
@@ -22,10 +20,10 @@ def generate_argument(topic, conn_arguements=None, judge_comments=None):
                 {topic}
 
                 Opponent Arguments:
-                {conn_arguements or "None"}
+                {conn_arguments}
 
                 Judge Feedback:
-                {judge_comments or "None"}
+                {judge_comments}
 
                 Generate your argument now.
                 """
@@ -33,33 +31,34 @@ def generate_argument(topic, conn_arguements=None, judge_comments=None):
     ]
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         messages=messages,
         temperature=0.8,       # persuasive but controlled
         max_tokens=300
     )
 
-    print(response.choices[0].message.content.strip())
+    # print(response.choices[0].message.content.strip())
+    
     return response.choices[0].message.content.strip()
 
-if __name__ == "__main__":
-    topic = "AI should replace traditional classroom teaching"
+# if __name__ == "__main__":
+#     topic = "AI should replace traditional classroom teaching"
 
-    conn_arguements = [
-        "Human teachers provide emotional intelligence.",
-        "AI lacks real-world classroom experience."
-    ]
+#     conn_arguements = [
+#         "Human teachers provide emotional intelligence.",
+#         "AI lacks real-world classroom experience."
+#     ]
 
-    judge_comments = [
-        "Provide concrete examples.",
-        "Avoid overgeneralized claims."
-    ]
+#     judge_comments = [
+#         "Provide concrete examples.",
+#         "Avoid overgeneralized claims."
+#     ]
 
-    output = generate_argument(
-        topic=topic,
-        conn_arguements=conn_arguements,
-        judge_comments=judge_comments
-    )
+#     output = generate_argument(
+#         topic=topic,
+#         conn_arguements=conn_arguements,
+#         judge_comments=judge_comments
+#     )
 
-    print("\n🟢 PRO AGENT OUTPUT:\n")
-    print(output)
+#     print("PRO AGENT OUTPUT:\n")
+#     print(output)
