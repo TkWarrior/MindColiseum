@@ -1,8 +1,11 @@
 from graph.graph import agent
 
 if __name__ == "__main__":
+    
+    user_input = input("Enter the debate topic: ")
+    
     initial_state = {
-        "debate_topic": "Is AI going to be more beneficial than harmful to humanity?",
+        "debate_topic": user_input,
         "round_no": 1,
         "max_rounds": 3,
         "current_agent": "pro_agent",
