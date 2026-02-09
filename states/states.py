@@ -11,7 +11,8 @@ class DebateState(TypedDict):
     conn_arguments : List[str] # List of arguments made by the con side  
     
     judge_comments : List[str]
-    scores : Dict[str, int] # {"pro": score , "con": score} objectively assign scores
+    scores : Dict[str, int] # {"pro": score , "con": score} cumulative scores
+    round_scores : List[Dict[str, int]]  # Per-round scores: [{"pro": 1, "con": 0}, ...]
     transcript : Annotated[List[Dict[str , str]] , add_messages] 
     
     debate_over : bool   

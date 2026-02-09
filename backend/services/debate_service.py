@@ -59,6 +59,7 @@ def _run_debate_async(debate_id: int, db_session_factory):
             "conn_arguments": [],
             "judge_comments": [],
             "scores": {"pro": 0, "con": 0},
+            "round_scores": [],  # Track per-round scores
             "transcript": [],
             "debate_over": False
         }
@@ -70,15 +71,21 @@ def _run_debate_async(debate_id: int, db_session_factory):
         pro_args = result.get("pro_arguments", [])
         con_args = result.get("conn_arguments", [])
         judge_comments = result.get("judge_comments", [])
+        round_scores = result.get("round_scores", [])
         
         num_rounds = max(len(pro_args), len(con_args))
         for i in range(num_rounds):
+            # Get per-round scores from round_scores list
+            round_score = round_scores[i] if i < len(round_scores) else {"pro": 0, "con": 0}
+            
             round_obj = Round(
                 debate_id=debate.id,
                 round_number=i + 1,
                 pro_argument=pro_args[i] if i < len(pro_args) else None,
                 con_argument=con_args[i] if i < len(con_args) else None,
                 judge_comment=judge_comments[i] if i < len(judge_comments) else None,
+                pro_score=round_score.get("pro", 0),
+                con_score=round_score.get("con", 0),
             )
             db.add(round_obj)
 

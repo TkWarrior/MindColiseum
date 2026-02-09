@@ -12,6 +12,9 @@ def judge_agent(state:DebateState):
     state["judge_comments"].append(comments)
     print("SCORES BEFORE:", state["scores"])
 
+    # Track per-round scores
+    state["round_scores"].append(updated_score)
+
     for side , score in updated_score.items():
         state["scores"][side] += score
     
@@ -25,6 +28,7 @@ def judge_agent(state:DebateState):
     return {
         "judge_comments":state["judge_comments"],
         "scores":state["scores"],
+        "round_scores":state["round_scores"],
         "round_no":state["round_no"],
         "debate_over":state["debate_over"]
     }
