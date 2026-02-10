@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.database.config import engine
 from backend.database.models import Base
 from backend.routers import debate
+from backend.routers import debate_stream
 
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(debate.router)
+app.include_router(debate_stream.router)
 
 
 @app.get("/")
