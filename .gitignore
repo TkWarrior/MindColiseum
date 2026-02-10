@@ -1,2 +1,15 @@
 .env
 venv/
+tts-miniservice/models
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.vscode/
+.idea/
+.DS_Store
