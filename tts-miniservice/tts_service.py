@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import wave
 import json
 import struct
@@ -80,6 +81,57 @@ def get_voice(agent: str):
     return voice
 
 
+def clean_text_for_tts(text: str) -> str:
+    """
+    Clean text before sending to TTS engine.
+    
+    Strips markdown formatting, bullet points, special tags, and other
+    non-speech characters that Piper would read literally.
+    
+    Examples:
+        "**AI will transform** education"  →  "AI will transform education"
+        "- Point one\n- Point two"        →  "Point one. Point two."
+        "[SUMMARY] The debate..."          →  "The debate..."
+    """
+    # Remove special tags like [SUMMARY], [PRO], [CON], etc.
+    text = re.sub(r'\[\w+\]', '', text)
+    
+    # Remove markdown bold **text** and __text__
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    text = re.sub(r'__(.*?)__', r'\1', text)
+    
+    # Remove markdown italic *text* and _text_ (single)
+    text = re.sub(r'\*(.*?)\*', r'\1', text)
+    text = re.sub(r'(?<!\w)_(.*?)_(?!\w)', r'\1', text)
+    
+    # Remove markdown headers (# ## ### etc.)
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    
+    # Convert bullet points (- or *) to sentences ending with period
+    text = re.sub(r'^\s*[-*•]\s+', '', text, flags=re.MULTILINE)
+    
+    # Convert numbered lists (1. 2. etc.) to plain text
+    text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
+    
+    # Remove markdown links [text](url) → text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # Remove inline code backticks
+    text = re.sub(r'`(.*?)`', r'\1', text)
+    
+    # Remove code blocks
+    text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+    
+    # Replace newlines with periods (so sentences flow naturally)
+    text = re.sub(r'\n+', '. ', text)
+    
+    # Clean up multiple periods and spaces
+    text = re.sub(r'\.\s*\.', '.', text)
+    text = re.sub(r'\s+', ' ', text)
+    
+    return text.strip()
+
+
 def generate_audio_bytes(text: str, agent: str = "pro") -> bytes:
     """
     Generate WAV audio bytes from text using the specified agent's voice.
@@ -91,6 +143,8 @@ def generate_audio_bytes(text: str, agent: str = "pro") -> bytes:
     Returns:
         WAV audio as bytes
     """
+    # Clean text before TTS — removes markdown, tags, formatting
+    text = clean_text_for_tts(text)
     voice = get_voice(agent)
 
     # synthesize_wav() sets WAV headers from first audio chunk and writes frames
