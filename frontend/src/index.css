@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-gray-200 font-body antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  .glow-text-blue {
+    text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+  }
+
+  .glow-text-red {
+    text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c;
+  }
+
+  .glow-box-blue {
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+  }
+}
