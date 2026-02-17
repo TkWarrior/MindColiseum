@@ -26,6 +26,7 @@ SSE Events Emitted:
 
 import json
 import logging
+import traceback
 from typing import AsyncGenerator
 
 from backend.database.models import Debate, Round, DebateStatus
@@ -81,9 +82,10 @@ def _extract_text_from_step(step: dict, node_name: str, state: dict) -> str:
         
     elif node_name == "summary_agent":
         # Summary is stored in transcript with [SUMMARY] tag
+        # NOTE: add_messages reducer converts dicts to AIMessage objects
         transcript = state.get("transcript", [])
         for entry in reversed(transcript):
-            content = entry.get("content", "")
+            content = getattr(entry, "content", "") if not isinstance(entry, dict) else entry.get("content", "")
             if "[SUMMARY]" in content:
                 return content.replace("[SUMMARY]", "").strip()
         return "Debate summary not available."
@@ -151,12 +153,12 @@ async def stream_debate(debate_id: int, db_session_factory) -> AsyncGenerator:
         })
 
         # ── Step 4: Stream through LangGraph node by node ───────────
-        # agent.stream() is a generator that yields after each node runs
+        # agent.astream() is an async generator that yields after each node runs
         # Each step is a dict: {"node_name": updated_state}
         current_round = 1
         final_state = initial_state.copy()
 
-        for step in agent.stream(initial_state):
+        async for step in agent.astream(initial_state):
             # Get which node just completed and its output state
             node_name = list(step.keys())[0]
             state = step[node_name]
@@ -199,11 +201,16 @@ async def stream_debate(debate_id: int, db_session_factory) -> AsyncGenerator:
                 })
 
         # ── Step 5: Save results to database ────────────────────────
-        # Same logic as debate_service._run_debate_async
+        # Refresh the debate object to avoid stale session after long astream
+        db.refresh(debate)
+
         pro_args = final_state.get("pro_arguments", [])
         con_args = final_state.get("conn_arguments", [])
         judge_comments = final_state.get("judge_comments", [])
         round_scores = final_state.get("round_scores", [])
+        
+        logger.info("Saving debate %d: %d pro_args, %d con_args, %d judge_comments, %d round_scores",
+                    debate_id, len(pro_args), len(con_args), len(judge_comments), len(round_scores))
         
         num_rounds = max(len(pro_args), len(con_args))
         for i in range(num_rounds):
@@ -227,14 +234,16 @@ async def stream_debate(debate_id: int, db_session_factory) -> AsyncGenerator:
         debate.status = DebateStatus.COMPLETED
 
         # Extract summary from transcript
+        # NOTE: add_messages reducer converts dicts to AIMessage objects
         transcript = final_state.get("transcript", [])
         for entry in reversed(transcript):
-            content = entry.get("content", "")
+            content = getattr(entry, "content", "") if not isinstance(entry, dict) else entry.get("content", "")
             if "[SUMMARY]" in content:
                 debate.summary = content.replace("[SUMMARY]", "").strip()
                 break
 
         db.commit()
+        logger.info("Debate %d saved successfully with status COMPLETED", debate_id)
 
         # ── Step 6: Send debate_complete event ──────────────────────
         yield _make_sse_event("debate_complete", {
@@ -245,7 +254,8 @@ async def stream_debate(debate_id: int, db_session_factory) -> AsyncGenerator:
         })
 
     except Exception as e:
-        logger.error("Debate streaming failed: %s", str(e))
+        logger.error("Debate streaming failed for debate %d: %s", debate_id, str(e))
+        logger.error("Full traceback:\n%s", traceback.format_exc())
         
         # Mark debate as failed in DB
         try:

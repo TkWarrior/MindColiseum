@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { debateService } from '../services/api'; 
+import { debateService } from '../services/api';
 import { motion } from 'framer-motion';
 import { ArrowRight, Cpu } from 'lucide-react';
 
@@ -16,9 +16,7 @@ const Home = () => {
     setLoading(true);
     try {
       const debate = await debateService.createDebate(topic);
-      // Immediately start the debate process in backend
-      await debateService.startDebate(debate.id);
-      
+      // Navigate to debate room — the SSE stream endpoint starts the debate
       navigate(`/debate/${debate.id}`);
     } catch (err) {
       console.error("Failed to start debate:", err);
@@ -36,7 +34,7 @@ const Home = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-blue/20 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-red/20 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="relative z-10 w-full max-w-2xl px-6"
