@@ -1,43 +1,48 @@
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { User, Shield, Gavel, Mic } from 'lucide-react';
+import { Mic } from 'lucide-react';
+import GlassOrb from './GlassOrb';
+
+const AGENT_GLOW = {
+  pro: { idle: '0 0 20px rgba(4, 0, 255, 0.41)', speaking: '0 0 40px rgba(38, 0, 255, 0.3), 0 0 80px rgba(0,136,255,0.2)' },
+  con: { idle: '0 0 20px rgba(255,0,60,0.15)', speaking: '0 0 40px rgba(255,0,60,0.4), 0 0 80px rgba(255,68,68,0.2)' },
+  judge: { idle: '0 0 20px rgba(0,255,136,0.15)', speaking: '0 0 40px rgba(0,255,136,0.4), 0 0 80px rgba(0,204,102,0.2)' },
+};
+
+const AGENT_TEXT_COLOR = {
+  pro: 'text-neon-blue',
+  con: 'text-neon-red',
+  judge: 'text-neon-green',
+};
 
 const AgentAvatar = ({ agent, isSpeaking }) => {
-  const isPro = agent === 'pro';
-  const isCon = agent === 'con';
-  const isJudge = agent === 'judge';
-
-  const borderColor = isPro ? 'border-neon-blue' : isCon ? 'border-neon-red' : 'border-neon-purple';
-  const glowClass = isSpeaking 
-    ? (isPro ? 'shadow-[0_0_30px_#00f3ff]' : isCon ? 'shadow-[0_0_30px_#ff003c]' : 'shadow-[0_0_30px_#bf00ff]') 
-    : '';
+  const glow = AGENT_GLOW[agent] || AGENT_GLOW.pro;
+  const textColor = AGENT_TEXT_COLOR[agent] || AGENT_TEXT_COLOR.pro;
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <motion.div 
+      {/* Orb with ambient glow */}
+      <motion.div
         animate={{ scale: isSpeaking ? 1.05 : 1 }}
-        transition={{ duration: 0.3 }}
-        className={clsx(
-          "w-32 h-32 rounded-full border-4 flex items-center justify-center bg-gray-900 transition-all duration-300",
-          borderColor,
-          glowClass
-        )}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
+        style={{
+          borderRadius: '50%',
+          boxShadow: isSpeaking ? glow.speaking : glow.idle,
+          transition: 'box-shadow 0.5s ease',
+        }}
       >
-        {isPro && <User size={48} className="text-neon-blue" />}
-        {isCon && <Shield size={48} className="text-neon-red" />}
-        {isJudge && <Gavel size={48} className="text-neon-purple" />}
+        <GlassOrb agent={agent} isSpeaking={isSpeaking} size={128} />
       </motion.div>
-      
+
+      {/* Label + Speaking indicator */}
       <div className="text-center">
-        <h3 className={clsx("text-xl font-bold uppercase tracking-widest", 
-          isPro ? "text-neon-blue" : isCon ? "text-neon-red" : "text-neon-purple"
-        )}>
+        <h3 className={clsx("text-xl font-bold uppercase tracking-widest", textColor)}>
           {agent.toUpperCase()}
         </h3>
         {isSpeaking && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="flex items-center gap-2 justify-center text-sm text-gray-400 mt-1"
           >
             <Mic size={14} className="animate-pulse" /> Speaking...
