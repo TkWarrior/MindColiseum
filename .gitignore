@@ -1,6 +1,6 @@
 .env
 venv/
-tts-miniservice/models
+tts_miniservice/models
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,3 +13,4 @@ build/
 .vscode/
 .idea/
 .DS_Store
+frontend/node_modules

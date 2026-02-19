@@ -13,8 +13,7 @@ def summary_agent(state:DebateState):
         "transcript": [
                 {
                     "role": "assistant",
-                    "content": f"[SUMM] {summary}"
+                    "content": f"[SUMMARY] {summary}"
                 }
                 ],
-        "summary":summary
     }

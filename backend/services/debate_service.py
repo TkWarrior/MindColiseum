@@ -97,11 +97,12 @@ def _run_debate_async(debate_id: int, db_session_factory):
         debate.status = DebateStatus.COMPLETED
 
         # Extract summary from transcript if available
+        # NOTE: add_messages reducer converts dicts to AIMessage objects,
+        # so we access .content attribute, not .get()
         transcript = result.get("transcript", [])
         if transcript:
-            # Find summary in transcript (usually the last entry from summary_agent)
             for entry in reversed(transcript):
-                content = entry.get("content", "")
+                content = getattr(entry, "content", "") if not isinstance(entry, dict) else entry.get("content", "")
                 if "[SUMMARY]" in content:
                     debate.summary = content.replace("[SUMMARY]", "").strip()
                     break
@@ -109,7 +110,9 @@ def _run_debate_async(debate_id: int, db_session_factory):
         db.commit()
 
     except Exception as e:
+        import traceback
         print(f"Debate execution failed: {e}")
+        print(f"Full traceback:\n{traceback.format_exc()}")
         debate = db.query(Debate).filter(Debate.id == debate_id).first()
         if debate:
             debate.status = DebateStatus.FAILED

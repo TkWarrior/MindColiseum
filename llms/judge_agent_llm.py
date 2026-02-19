@@ -37,10 +37,23 @@ def evaluate_arguments(pro_arguments, conn_arguments):
         max_tokens=300
     )
     raw = response.choices[0].message.content.strip()
-    parsed = json.loads(raw)
+    
+    # LLMs often wrap JSON in markdown code fences — strip them
+    if raw.startswith("```"):
+        # Remove ```json or ``` prefix and trailing ```
+        lines = raw.split("\n")
+        # Remove first line (```json) and last line (```)
+        lines = [l for l in lines if not l.strip().startswith("```")]
+        raw = "\n".join(lines).strip()
+    
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        # Fallback: if LLM returns invalid JSON, return safe defaults
+        print(f"[JUDGE] Failed to parse JSON from LLM response: {raw[:200]}")
+        return "Judge could not parse scores this round.", {"pro": 0, "con": 0}
+    
     result = parsed["comments"], parsed["updated_score"]
-    # print("raw print:" ,raw)
-    # print("result print:",result)
     return result
 
 # if __name__ == "__main__":
