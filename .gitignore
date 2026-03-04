@@ -1,6 +1,6 @@
 .env
 venv/
-tts-miniservice/models
+tts_miniservice/models
 __pycache__/
 *.py[cod]
 *$py.class
